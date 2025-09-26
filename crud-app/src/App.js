@@ -6,10 +6,45 @@ import { Modal } from 'react-responsive-modal';
 import { useState } from 'react';
 
 function App() {
+  const blankuser = {
+    "name": "",
+    "email": "",
+    "role": "",
+    "address": ""
+  }
   const [open, setOpen] = useState(false);
+  const [user, setUser] = useState(blankuser);
+  const [userdata, setUserdata] = useState([]);
+  const [action, setAction] = useState('Add');
+  const [editIndex, setEditIndex] = useState(null);
 
   const onOpenModal = () => setOpen(true);
   const onCloseModal = () => setOpen(false);
+
+  const addUser = () => {
+    setUserdata([...userdata, user]);
+    setUser(blankuser);
+    onCloseModal();
+  }
+  const editUser = (index) => {
+    setAction('Edit')
+    const selectedUser=  userdata.find((x,i)=> i === index);
+    setUser(selectedUser)
+    setEditIndex(index)
+    onOpenModal();
+  }
+    const updateUser = () => {
+    const newusers = userdata.map((x,i) => {
+      if(i === editIndex){
+        x = user
+      }
+      return x
+    });
+    setUserdata(newusers);
+    setUser(blankuser);
+    setEditIndex(null);
+    onCloseModal();
+  }
 
 
   return (
@@ -22,6 +57,8 @@ function App() {
         <button className='btn' onClick={onOpenModal}><PlusCircle size={16}></PlusCircle><span>Add</span></button>
       </div>
       <hr />
+      <p>{JSON.stringify(userdata)}</p>
+
       <table className='table'>
         <thead>
           <tr>
@@ -33,32 +70,39 @@ function App() {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Kevin</td>
-            <td>Kevin@gmail.com</td>
-            <td>Manager</td>
-            <td>Pakistan Ex,,New Islamabab </td>
-            <td>
-              <button className='btn ml2' ><Edit size={16}></Edit><span>Edit</span></button>
-              <button className='btn ml2'><Trash2 size={16}></Trash2><span>Delete</span></button>
-            </td>
-          </tr>
+          {userdata.length > 0 && userdata.map((user, index) => {
+            return (<tr>
+              <td>{user.name}</td>
+              <td>{user.email}</td>
+              <td>{user.role}</td>
+              <td>{user.address} </td>
+              <td>
+                <button className='btn ml2' onClick={() => editUser(index)}><Edit size={16}></Edit><span>Edit</span></button>
+                <button className='btn ml2'><Trash2 size={16}></Trash2><span>Delete</span></button>
+              </td>
+            </tr>)
+          })
+          }
+
         </tbody>
       </table>
       <Modal open={open} onClose={onCloseModal} center>
         <div className='form'>
-        <h2>Add User</h2>
-        <label htmlFor="name">Name</label>
-        <input type="text" />
-        <label htmlFor="name">Email</label>
-        <input type="text" />
-        <label htmlFor="name">Role</label>
-        <input type="text" />
-        <label htmlFor="name">Address</label>
-        <textarea name="address" id="" cols="30" rows="10"></textarea>
-        <button className="btn">Submit</button>
-        </div>      
-        </Modal>
+          <h2>{action} User</h2>
+          <p>{JSON.stringify(user)}</p>
+          <label htmlFor="name">Name</label>
+          <input type="text" value={user.name} onChange={(e) => setUser({ ...user, "name": e.target.value })} />
+          <label htmlFor="name">Email</label>
+          <input type="text" value={user.email} onChange={(e) => setUser({ ...user, "email": e.target.value })} />
+          <label htmlFor="name">Role</label>
+          <input type="text" value={user.role} onChange={(e) => setUser({ ...user, "role": e.target.value })} />
+          <label htmlFor="name">Address</label>
+          <textarea name="" id="" cols="30" rows="4" onChange={(e) => setUser({ ...user, "address": e.target.value })}></textarea>
+          {/* <button className="btn">Submit</button> */}
+          {action === 'Add' && <button className='btn' onClick={() => addUser()}>Submit</button>}
+          {action === 'Edit' && <button className='btn' onClick={() => updateUser()}>Update</button>}        
+          </div>
+      </Modal>
     </div>
   );
 }
